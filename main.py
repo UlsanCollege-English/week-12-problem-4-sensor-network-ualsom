@@ -1,42 +1,47 @@
+import heapq
 
-## main.py
-```python
 def prim_mst(graph, start):
     """
-    Build a minimum spanning tree (MST) using a Prim-style algorithm.
-
-    graph: dict mapping node -> list of (neighbor, weight) pairs.
-           The graph is undirected (neighbors listed in both directions).
-    start: starting node for Prim's algorithm.
-
-    Return:
-        (mst_edges, total_cost)
-        - mst_edges: list of (u, v, w) edges in the MST.
-        - total_cost: sum of weights w in all MST edges.
-
-    You may assume:
-        - graph is connected.
-        - start exists in graph.
+    Build a Minimum Spanning Tree (MST) using Prim's algorithm.
+    Deterministic selection: tie-breaking by node names.
     """
-    # TODO Step 1: Describe in your own words what MST means.
-    # TODO Step 2: Re-phrase this problem in a very simple sentence.
-    # TODO Step 3: Decide on data structures: visited set, edge list, mst_edges list, total_cost.
-    # TODO Step 4: Plan Prim's algorithm: how do you grow the tree from the start node?
-    # TODO Step 5: Write pseudocode for your Prim loop.
-    # TODO Step 6: Implement the code here based on your pseudocode.
-    # TODO Step 7: Test with small graphs and draw them to check the MST.
-    # TODO Step 8: Reason about the time complexity of your approach.
 
-    raise NotImplementedError("prim_mst is not implemented yet")
+    visited = set([start])
+    mst_edges = []
+    total_cost = 0
+    edge_heap = []
+
+    # Push all edges from start node
+    for neighbor, weight in graph[start]:
+        heapq.heappush(edge_heap, (weight, start, neighbor))
+
+    while edge_heap and len(visited) < len(graph):
+        weight, u, v = heapq.heappop(edge_heap)
+
+        if v in visited:
+            continue
+
+        visited.add(v)
+        # Order nodes deterministically
+        mst_edges.append((u, v, weight))
+        total_cost += weight
+
+        for neighbor, w in graph[v]:
+            if neighbor not in visited:
+                # Ensure deterministic ordering
+                heapq.heappush(edge_heap, (w, v, neighbor))
+
+    return mst_edges, total_cost
 
 
 if __name__ == "__main__":
-    # Optional manual test
     sample_graph = {
-        "G1": [("G2", 4), ("G3", 2)],
-        "G2": [("G1", 4), ("G3", 3)],
-        "G3": [("G1", 2), ("G2", 3)],
+        "A": [("B", 3), ("C", 1), ("D", 4)],
+        "B": [("A", 3), ("C", 2), ("D", 5)],
+        "C": [("A", 1), ("B", 2), ("D", 1)],
+        "D": [("A", 4), ("B", 5), ("C", 1)],
     }
-    edges, cost = prim_mst(sample_graph, "G1")
-    print("Sample MST edges:", edges)
+
+    edges, cost = prim_mst(sample_graph, "A")
+    print("MST edges:", edges)
     print("Total cost:", cost)
